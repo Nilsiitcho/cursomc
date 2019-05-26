@@ -1,5 +1,6 @@
 package br.com.estudo.estudodecaso;
 
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,11 +10,25 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import br.com.estudo.estudodecaso.domain.Categoria;
 import br.com.estudo.estudodecaso.domain.Cidade;
+import br.com.estudo.estudodecaso.domain.Cliente;
+import br.com.estudo.estudodecaso.domain.Endereco;
 import br.com.estudo.estudodecaso.domain.Estado;
+import br.com.estudo.estudodecaso.domain.ItemPedido;
+import br.com.estudo.estudodecaso.domain.Pagamento;
+import br.com.estudo.estudodecaso.domain.PagamentoComBoleto;
+import br.com.estudo.estudodecaso.domain.PagamentoComCartao;
+import br.com.estudo.estudodecaso.domain.Pedido;
 import br.com.estudo.estudodecaso.domain.Produto;
+import br.com.estudo.estudodecaso.domain.enums.EstadoPagamento;
+import br.com.estudo.estudodecaso.domain.enums.TipoCliente;
 import br.com.estudo.estudodecaso.repositories.CategoriaRepository;
 import br.com.estudo.estudodecaso.repositories.CidadeRepository;
+import br.com.estudo.estudodecaso.repositories.ClienteRepository;
+import br.com.estudo.estudodecaso.repositories.EnderecoRepository;
 import br.com.estudo.estudodecaso.repositories.EstadoRepository;
+import br.com.estudo.estudodecaso.repositories.ItemPedidoRepository;
+import br.com.estudo.estudodecaso.repositories.PagamentoRespository;
+import br.com.estudo.estudodecaso.repositories.PedidoRepository;
 import br.com.estudo.estudodecaso.repositories.ProdutoRepository;
 
 @SpringBootApplication
@@ -30,6 +45,21 @@ public class CursomcApplication implements CommandLineRunner {
 
 	@Autowired
 	EstadoRepository estadoRepository;
+
+	@Autowired
+	private ClienteRepository clienteRepository;
+
+	@Autowired
+	private EnderecoRepository enderecoRepository;
+
+	@Autowired
+	private PagamentoRespository pagamentoRespository;
+
+	@Autowired
+	private PedidoRepository pedidoRepository;
+
+	@Autowired
+	private ItemPedidoRepository itemPedidoRepository;
 
 	public static void main(String[] args) {
 		SpringApplication.run(CursomcApplication.class, args);
@@ -67,6 +97,47 @@ public class CursomcApplication implements CommandLineRunner {
 
 		estadoRepository.save(Arrays.asList(est1, est2));
 		cidadeRepository.save(Arrays.asList(c1, c2, c3));
+
+		Cliente cli1 = new Cliente(null, "Maria Silva", "maria@gmail.com", "12678565645", TipoCliente.PESSOAFISICA);
+		cli1.getTelefones().addAll(Arrays.asList("32353058", "991914086"));
+
+		Endereco e1 = new Endereco(null, "Rua Padre MArio Forestan", "76", "Centro", "38400770", cli1, c1);
+		Endereco e2 = new Endereco(null, "Atilho Valentini", "1350", "Santa Mônica", "38409080", cli1, c2);
+
+		cli1.getEnderecos().addAll(Arrays.asList(e1, e2));
+
+		clienteRepository.save(cli1);
+		enderecoRepository.save(Arrays.asList(e1, e2));
+
+		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+
+		Pedido ped1 = new Pedido(null, sdf.parse("30/09/2017 10:32"), cli1, e1);
+		Pedido ped2 = new Pedido(null, sdf.parse("10/10/2017 19:35"), cli1, e2);
+
+		Pagamento pagto1 = new PagamentoComCartao(null, EstadoPagamento.QUITADO, ped1, 6);
+		ped1.setPagamento(pagto1);
+
+		Pagamento pagto2 = new PagamentoComBoleto(null, EstadoPagamento.PENDENTE, ped2, sdf.parse("20/10/2017 00:00"),
+				null);
+		ped2.setPagamento(pagto2);
+
+		cli1.getPedidos().addAll(Arrays.asList(ped1, ped2));
+
+		pedidoRepository.save(Arrays.asList(ped1, ped2));
+		pagamentoRespository.save(Arrays.asList(pagto1, pagto2));
+
+		ItemPedido ip1 = new ItemPedido(ped1, p1, 0.00, 1, 2000.00);
+		ItemPedido ip2 = new ItemPedido(ped1, p3, 0.00, 2, 80.00);
+		ItemPedido ip3 = new ItemPedido(ped2, p2, 100.00, 1, 800.00);
+
+		ped1.getItens().addAll(Arrays.asList(ip1, ip2));
+		ped2.getItens().addAll(Arrays.asList(ip3));
+
+		p1.getItens().addAll(Arrays.asList(ip1));
+		p2.getItens().addAll(Arrays.asList(ip3));
+		p3.getItens().addAll(Arrays.asList(ip2));
+
+		itemPedidoRepository.save(Arrays.asList(ip1, ip2, ip3));
 
 	}
 
