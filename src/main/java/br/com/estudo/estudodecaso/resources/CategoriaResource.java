@@ -35,13 +35,6 @@ public class CategoriaResource {
 
 	}
 	
-	@RequestMapping(method = RequestMethod.GET)
-	public ResponseEntity<List<CategoriaDTO>> findAll() {
-		List<Categoria> listCategorias = service.findAll();
-		List<CategoriaDTO> listDto = listCategorias.stream().map(obj -> new CategoriaDTO(obj)).collect(Collectors.toList());
-		return ResponseEntity.ok().body(listDto);
-
-	}
 
 	@RequestMapping(method = RequestMethod.POST)
 	public ResponseEntity<Void> insert(@Valid @RequestBody CategoriaDTO categoriaDto) {
@@ -54,6 +47,14 @@ public class CategoriaResource {
 		return ResponseEntity.created(uri).build();
 	}
 
+	@RequestMapping(method = RequestMethod.GET)
+	public ResponseEntity<List<CategoriaDTO>> findAll() {
+		List<Categoria> listCategorias = service.findAll();
+		List<CategoriaDTO> listDto = listCategorias.stream().map(obj -> new CategoriaDTO(obj)).collect(Collectors.toList());
+		return ResponseEntity.ok().body(listDto);
+
+	}
+	
 	@RequestMapping(value = "{id}", method = RequestMethod.PUT)
 	public ResponseEntity<Void> update(@Valid @RequestBody CategoriaDTO categoriaDto, @PathVariable Integer id) {
 		Categoria categoria = service.fromDTO(categoriaDto);
